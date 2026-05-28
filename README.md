@@ -1,5 +1,7 @@
 # rag-chatbot
 
+![CI](https://github.com/css4180-alt/rag-chatbot/actions/workflows/ci.yml/badge.svg)
+
 Upload your documents, ask in natural language. RAG-based document Q&A chatbot built with FastAPI, LangChain, and Gemini.
 
 **Live demo**: Coming soon
