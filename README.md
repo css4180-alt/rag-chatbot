@@ -4,7 +4,7 @@
 
 Upload your documents, ask in natural language. RAG-based document Q&A chatbot built with FastAPI, LangChain, and Gemini.
 
-**Live demo**: Coming soon
+**Live demo**: https://rag-chatbot-bold-dream-143.fly.dev
 
 ---
 
@@ -73,13 +73,13 @@ pytest
 ## Roadmap
 
 - [x] Project setup & directory structure
-- [ ] Document upload + chunking + embedding
-- [ ] RAG chain (retriever + LLM)
-- [ ] Chat API with SSE streaming
-- [ ] Vue 3 frontend
-- [ ] Docker single-container build
-- [ ] Fly.io deployment
-- [ ] GitHub Actions CI/CD
+- [x] Document upload + chunking + embedding
+- [x] RAG chain (retriever + LLM)
+- [x] Chat API with SSE streaming
+- [x] Vue 3 frontend
+- [x] Docker single-container build
+- [x] Fly.io deployment
+- [x] GitHub Actions CI/CD
 
 ## License
 
