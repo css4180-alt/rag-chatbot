@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for rag-chatbot-bold-dream-143 on 2026-05-28T22:59:49+09:00
+# fly.toml app configuration file for css4180-alt-chatbot
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'rag-chatbot-bold-dream-143'
+app = 'css4180-alt-chatbot'
 primary_region = 'nrt'
 
 # 임베딩 모델 로딩 시 메모리 스파이크 대비

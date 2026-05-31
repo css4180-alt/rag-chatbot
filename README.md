@@ -4,7 +4,17 @@
 
 Upload your documents, ask in natural language. RAG-based document Q&A chatbot built with FastAPI, LangChain, and Gemini.
 
-**Live demo**: https://rag-chatbot-bold-dream-143.fly.dev
+**Live demo**: https://css4180-alt-chatbot.fly.dev
+
+---
+
+## Demo
+
+![Chat demo](docs/images/chat-demo.gif)
+
+| Upload documents | Ask & get grounded answers |
+|---|---|
+| ![Document upload](docs/images/upload.png) | ![Chat with sources](docs/images/chat.png) |
 
 ---
 
