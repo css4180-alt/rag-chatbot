@@ -1,0 +1,11 @@
+# Caddy 리버스 프록시 설정.
+# SITE_ADDRESS 환경변수(예: myrag.duckdns.org)에 대해 Let's Encrypt
+# 인증서를 자동 발급/갱신하고, 내부 app 컨테이너(8000)로 프록시한다.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# flush_interval -1 : SSE 스트리밍 응답을 버퍼링 없이 즉시 흘려보낸다.
+	reverse_proxy app:8000 {
+		flush_interval -1
+	}
+}

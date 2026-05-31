@@ -1,0 +1,44 @@
+# 프로덕션 배포용 compose (Oracle Cloud ARM VM 등 상시 가동 서버).
+#
+# - app   : 프론트+백엔드 단일 컨테이너(루트 Dockerfile). 8000 포트는
+#           외부에 노출하지 않고 caddy 를 통해서만 접근한다.
+# - caddy : 80/443 리버스 프록시. DuckDNS 도메인에 대해 HTTPS 자동 발급.
+#
+# 사용:
+#   cd deploy
+#   SITE_ADDRESS=myrag.duckdns.org docker compose -f docker-compose.prod.yml up -d --build
+#
+# GOOGLE_API_KEY 등은 ../backend/.env 에서 읽는다(.env.example 참고).
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    expose:
+      - "8000"
+    volumes:
+      - app_data:/app/data
+    env_file:
+      - ../backend/.env
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # 비어 있으면 빌드/기동 시 알려주도록 기본값을 두지 않는다.
+      - SITE_ADDRESS=${SITE_ADDRESS:?SITE_ADDRESS(도메인)를 지정하세요. 예: SITE_ADDRESS=myrag.duckdns.org}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  app_data:
+  caddy_data:
+  caddy_config:
