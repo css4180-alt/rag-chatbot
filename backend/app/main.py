@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api import chat, documents
-from app.db.database import Base, engine
+from app.db.database import Base, engine, run_lightweight_migrations
 
 
 @asynccontextmanager
@@ -15,6 +15,7 @@ async def lifespan(app: FastAPI):
     os.makedirs("data/sqlite", exist_ok=True)
     os.makedirs("data/chroma", exist_ok=True)
     Base.metadata.create_all(bind=engine)
+    run_lightweight_migrations()
     yield
 
 

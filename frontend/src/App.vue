@@ -16,15 +16,21 @@
       </a>
     </header>
     <main class="main">
-      <DocumentPanel />
+      <ConversationSidebar />
       <ChatPanel />
+      <DocumentPanel />
     </main>
   </div>
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+import ConversationSidebar from './components/ConversationSidebar.vue'
 import DocumentPanel from './components/DocumentPanel.vue'
 import ChatPanel from './components/ChatPanel.vue'
+import { store } from './store.js'
+
+onMounted(() => store.init())
 </script>
 
 <style scoped>

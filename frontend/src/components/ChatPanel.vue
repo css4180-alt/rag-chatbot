@@ -1,7 +1,7 @@
 <template>
   <section class="chat-panel">
     <div class="messages" ref="messagesEl">
-      <div v-if="!messages.length && !streaming" class="welcome">
+      <div v-if="!store.messages.length && !store.streaming" class="welcome">
         <span class="welcome-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -18,7 +18,7 @@
       </div>
 
       <div
-        v-for="(msg, i) in messages"
+        v-for="(msg, i) in store.messages"
         :key="i"
         class="message"
         :class="msg.role"
@@ -28,7 +28,7 @@
           <span class="text">{{ msg.content }}</span>
           <div v-if="msg.sources?.length" class="sources">
             <span class="sources-label">참조 문서</span>
-            <span v-for="(src, j) in msg.sources" :key="j" class="source-tag">
+            <span v-for="(src, j) in dedupeSources(msg.sources)" :key="j" class="source-tag">
               {{ src.filename }}
             </span>
           </div>
@@ -36,10 +36,10 @@
       </div>
 
       <!-- 스트리밍 중인 답변 -->
-      <div v-if="streaming" class="message assistant">
+      <div v-if="store.streaming" class="message assistant">
         <span class="role-tag">AI</span>
         <div class="bubble">
-          <span v-if="streamingText" class="text">{{ streamingText }}<span class="cursor">▋</span></span>
+          <span v-if="store.streamingText" class="text">{{ store.streamingText }}<span class="cursor">▋</span></span>
           <span v-else class="typing" aria-label="생각 중"><i></i><i></i><i></i></span>
         </div>
       </div>
@@ -49,25 +49,21 @@
       <input
         v-model="input"
         placeholder="질문을 입력하세요…"
-        :disabled="streaming"
+        :disabled="store.streaming"
         class="chat-input"
       />
-      <button type="submit" :disabled="streaming || !input.trim()" class="send-btn">
-        {{ streaming ? '…' : '전송' }}
+      <button type="submit" :disabled="store.streaming || !input.trim()" class="send-btn">
+        {{ store.streaming ? '…' : '전송' }}
       </button>
     </form>
   </section>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
-import { askQuestion } from '../api/client.js'
+import { ref, nextTick, watch } from 'vue'
+import { store } from '../store.js'
 
-const messages = ref([])
 const input = ref('')
-const streaming = ref(false)
-const streamingText = ref('')
-const sessionId = ref(null)
 const messagesEl = ref(null)
 
 async function scrollToBottom() {
@@ -77,50 +73,27 @@ async function scrollToBottom() {
   }
 }
 
-function send() {
-  const question = input.value.trim()
-  if (!question || streaming.value) return
+// 메시지/스트리밍 변화에 맞춰 자동 스크롤
+watch(
+  () => [store.messages.length, store.streamingText, store.activeSessionId],
+  scrollToBottom,
+)
 
-  messages.value.push({ role: 'user', content: question })
-  input.value = ''
-  streaming.value = true
-  streamingText.value = ''
-  scrollToBottom()
-
-  askQuestion(question, sessionId.value, {
-    onSessionId(id) {
-      sessionId.value = id
-    },
-    onToken(token) {
-      streamingText.value += token
-      scrollToBottom()
-    },
-    onSources(sources) {
-      // sources는 done 이벤트 이후 메시지에 첨부
-      messages.value.push({
-        role: 'assistant',
-        content: streamingText.value,
-        sources,
-      })
-      streamingText.value = ''
-      streaming.value = false
-      scrollToBottom()
-    },
-    onDone() {
-      // sources 없이 done이 오는 경우 대비
-      if (streaming.value) {
-        messages.value.push({ role: 'assistant', content: streamingText.value })
-        streamingText.value = ''
-        streaming.value = false
-      }
-      scrollToBottom()
-    },
-    onError(msg) {
-      messages.value.push({ role: 'assistant', content: `오류: ${msg}` })
-      streaming.value = false
-      scrollToBottom()
-    },
+function dedupeSources(sources) {
+  const seen = new Set()
+  return sources.filter((s) => {
+    if (seen.has(s.filename)) return false
+    seen.add(s.filename)
+    return true
   })
+}
+
+function send() {
+  const q = input.value.trim()
+  if (!q || store.streaming) return
+  input.value = ''
+  store.send(q)
+  scrollToBottom()
 }
 </script>
 
@@ -129,6 +102,7 @@ function send() {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   background: var(--paper);
   position: relative;
@@ -148,7 +122,7 @@ function send() {
 .messages {
   flex: 1;
   overflow-y: auto;
-  padding: 28px clamp(16px, 6vw, 64px);
+  padding: 28px clamp(16px, 5vw, 56px);
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -302,7 +276,7 @@ function send() {
 .input-row {
   display: flex;
   gap: 10px;
-  padding: 16px clamp(16px, 6vw, 64px);
+  padding: 16px clamp(16px, 5vw, 56px);
   border-top: 1px solid var(--line);
   background: var(--surface);
 }

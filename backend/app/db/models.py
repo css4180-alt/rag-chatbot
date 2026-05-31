@@ -15,12 +15,17 @@ class Document(Base):
     uploaded_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     chunk_count: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(50), default="pending")
+    # NULL이면 전역 문서(모든 대화에서 참조), 값이 있으면 해당 대화 전용 문서.
+    session_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("chat_sessions.id"), nullable=True, index=True
+    )
 
 
 class ChatSession(Base):
     __tablename__ = "chat_sessions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    title: Mapped[str | None] = mapped_column(String(200), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     last_message_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 

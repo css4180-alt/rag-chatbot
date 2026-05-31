@@ -33,6 +33,7 @@ class ChatMessageResponse(BaseModel):
 
 class ChatSessionResponse(BaseModel):
     id: int
+    title: str | None = None
     created_at: datetime
     last_message_at: datetime
 

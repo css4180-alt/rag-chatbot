@@ -1,88 +1,106 @@
 <template>
   <aside class="doc-panel">
-    <div class="panel-head">
-      <h2>문서</h2>
-      <span class="count" v-if="documents.length">{{ documents.length }}</span>
-    </div>
+    <!-- 전역 문서 -->
+    <section class="doc-section">
+      <div class="sec-head">
+        <h2>전역 문서</h2>
+        <span class="count" v-if="store.globalDocs.length">{{ store.globalDocs.length }}</span>
+      </div>
+      <p class="sec-desc">모든 대화에서 참조됩니다.</p>
 
-    <label class="upload-btn" :class="{ loading: uploading }">
-      <input type="file" accept=".pdf,.md,.txt" @change="handleUpload" :disabled="uploading" />
-      <span class="upload-icon" aria-hidden="true">{{ uploading ? '⟳' : '＋' }}</span>
-      <span>{{ uploading ? '업로드 중…' : '파일 추가' }}</span>
-      <small>PDF · Markdown · TXT</small>
-    </label>
+      <label class="upload-btn" :class="{ loading: uploadingGlobal }">
+        <input type="file" accept=".pdf,.md,.txt" :disabled="uploadingGlobal" @change="onUpload($event, 'global')" />
+        <span class="upload-icon" aria-hidden="true">{{ uploadingGlobal ? '⟳' : '＋' }}</span>
+        <span>{{ uploadingGlobal ? '업로드 중…' : '전역 문서 추가' }}</span>
+        <small>PDF · Markdown · TXT</small>
+      </label>
+
+      <DocList :docs="store.globalDocs" scope="global" empty="전역 문서가 없습니다." @delete="onDelete" />
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- 이 대화 문서 -->
+    <section class="doc-section">
+      <div class="sec-head">
+        <h2>이 대화 문서</h2>
+        <span class="count" v-if="store.sessionDocs.length">{{ store.sessionDocs.length }}</span>
+      </div>
+      <p class="sec-desc">현재 대화에서만 참조됩니다.</p>
+
+      <template v-if="hasSession">
+        <label class="upload-btn" :class="{ loading: uploadingSession }">
+          <input type="file" accept=".pdf,.md,.txt" :disabled="uploadingSession" @change="onUpload($event, 'session')" />
+          <span class="upload-icon" aria-hidden="true">{{ uploadingSession ? '⟳' : '＋' }}</span>
+          <span>{{ uploadingSession ? '업로드 중…' : '대화 문서 추가' }}</span>
+          <small>PDF · Markdown · TXT</small>
+        </label>
+        <DocList :docs="store.sessionDocs" scope="session" empty="이 대화 전용 문서가 없습니다." @delete="onDelete" />
+      </template>
+      <div v-else class="locked">
+        <span class="lock-mark" aria-hidden="true">⌁</span>
+        <p>질문을 한 번 보내 대화를 시작하면<br />이 대화 전용 문서를 추가할 수 있습니다.</p>
+      </div>
+    </section>
+
     <p v-if="uploadError" class="error">{{ uploadError }}</p>
-
-    <ul v-if="documents.length" class="doc-list">
-      <li v-for="doc in documents" :key="doc.id" class="doc-item" :class="doc.status">
-        <span class="doc-dot" :class="doc.status" aria-hidden="true"></span>
-        <span class="doc-name" :title="doc.filename">{{ doc.filename }}</span>
-        <button class="del-btn" @click="handleDelete(doc.id)" title="삭제">✕</button>
-        <span class="doc-meta">{{ doc.chunk_count }} chunks · {{ statusLabel(doc.status) }}</span>
-      </li>
-    </ul>
-    <div v-else class="empty">
-      <span class="empty-mark" aria-hidden="true">⌁</span>
-      <p>업로드된 문서가 없습니다.</p>
-    </div>
   </aside>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { listDocuments, uploadDocument, deleteDocument } from '../api/client.js'
+import { ref, computed } from 'vue'
+import { store } from '../store.js'
+import DocList from './DocList.vue'
 
-const documents = ref([])
-const uploading = ref(false)
+const uploadingGlobal = ref(false)
+const uploadingSession = ref(false)
 const uploadError = ref('')
 
-async function loadDocuments() {
-  documents.value = await listDocuments()
-}
+const hasSession = computed(() => store.activeSessionId != null)
 
-async function handleUpload(e) {
+async function onUpload(e, scope) {
   const file = e.target.files[0]
   if (!file) return
-  uploading.value = true
   uploadError.value = ''
+  const flag = scope === 'global' ? uploadingGlobal : uploadingSession
+  flag.value = true
   try {
-    await uploadDocument(file)
-    await loadDocuments()
+    if (scope === 'global') await store.uploadGlobalDoc(file)
+    else await store.uploadSessionDoc(file)
   } catch (err) {
     uploadError.value = err.message
   } finally {
-    uploading.value = false
+    flag.value = false
     e.target.value = ''
   }
 }
 
-async function handleDelete(id) {
+async function onDelete({ id, scope }) {
   if (!confirm('이 문서를 삭제할까요?')) return
-  await deleteDocument(id)
-  await loadDocuments()
+  await store.removeDocument(id, scope)
 }
-
-function statusLabel(status) {
-  return { ready: '준비됨', processing: '처리 중', error: '오류' }[status] ?? status
-}
-
-onMounted(loadDocuments)
 </script>
 
 <style scoped>
 .doc-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 22px 18px;
+  gap: 14px;
+  padding: 22px 16px;
   background: var(--surface);
-  border-right: 1px solid var(--line);
-  width: 280px;
-  min-width: 280px;
+  border-left: 1px solid var(--line);
+  width: 290px;
+  min-width: 290px;
   overflow-y: auto;
 }
 
-.panel-head {
+.doc-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sec-head {
   display: flex;
   align-items: baseline;
   gap: 8px;
@@ -91,7 +109,7 @@ h2 {
   margin: 0;
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--ink-faint);
   font-family: var(--font-mono);
@@ -104,6 +122,17 @@ h2 {
   padding: 1px 7px;
   border-radius: 99px;
 }
+.sec-desc {
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  margin-top: -4px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 2px 0;
+}
 
 /* Upload dropzone */
 .upload-btn {
@@ -111,7 +140,7 @@ h2 {
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 18px 12px;
+  padding: 14px 12px;
   border: 1.5px dashed var(--line-strong);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -124,117 +153,30 @@ h2 {
   color: var(--accent);
   background: var(--accent-soft);
 }
-.upload-btn .upload-icon {
-  font-size: 1.1rem;
-  line-height: 1;
-}
-.upload-btn span:nth-of-type(2) {
-  font-size: 0.86rem;
-  font-weight: 600;
-}
+.upload-btn .upload-icon { font-size: 1.1rem; line-height: 1; }
+.upload-btn span:nth-of-type(2) { font-size: 0.84rem; font-weight: 600; }
 .upload-btn small {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   letter-spacing: 0.03em;
   color: var(--ink-faint);
 }
-.upload-btn.loading {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.upload-btn.loading .upload-icon {
-  animation: spin 0.9s linear infinite;
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+.upload-btn.loading { opacity: 0.6; cursor: not-allowed; }
+.upload-btn.loading .upload-icon { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .upload-btn input { display: none; }
 
-/* Document list */
-.doc-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.doc-item {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  transition: border-color 0.16s, box-shadow 0.16s, transform 0.16s;
-  animation: slide-in 0.3s ease backwards;
-}
-.doc-item:hover {
-  border-color: var(--line-strong);
-  box-shadow: var(--shadow-sm);
-}
-@keyframes slide-in {
-  from { opacity: 0; transform: translateY(4px); }
-}
-
-.doc-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 99px;
-  background: var(--ink-faint);
-}
-.doc-dot.ready { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.doc-dot.processing { background: #d99a2b; animation: pulse 1.2s ease-in-out infinite; }
-.doc-dot.error { background: var(--danger); }
-@keyframes pulse {
-  50% { opacity: 0.35; }
-}
-
-.doc-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
-  font-size: 0.82rem;
-  color: var(--ink);
-}
-.doc-meta {
-  grid-column: 2 / 4;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--ink-faint);
-  white-space: nowrap;
-}
-.del-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--ink-faint);
-  font-size: 0.72rem;
-  padding: 2px 4px;
-  border-radius: 5px;
-  transition: color 0.16s, background 0.16s;
-}
-.del-btn:hover {
-  color: var(--danger);
-  background: var(--surface-2);
-}
-
-.empty {
-  margin-top: 28px;
+.locked {
   text-align: center;
   color: var(--ink-faint);
+  padding: 16px 8px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
 }
-.empty-mark {
-  display: block;
-  font-size: 1.6rem;
-  opacity: 0.5;
-  margin-bottom: 6px;
-}
-.empty p {
-  font-size: 0.8rem;
-}
+.locked .lock-mark { display: block; font-size: 1.4rem; opacity: 0.5; margin-bottom: 6px; }
+.locked p { font-size: 0.76rem; line-height: 1.6; }
+
 .error {
   font-size: 0.78rem;
   color: var(--danger);
