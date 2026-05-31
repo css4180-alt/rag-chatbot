@@ -15,6 +15,12 @@
         GitHub
       </a>
     </header>
+    <transition name="wake-slide">
+      <div v-if="store.waking" class="waking-banner" role="status">
+        <span class="wake-dot" aria-hidden="true"></span>
+        서버가 절전 상태에서 깨어나는 중입니다. 최대 2~3분 정도 걸릴 수 있어요…
+      </div>
+    </transition>
     <main class="main">
       <ConversationSidebar />
       <ChatPanel />
@@ -105,6 +111,41 @@ onMounted(() => store.init())
   display: flex;
   flex: 1;
   overflow: hidden;
+}
+
+/* 콜드 스타트 안내 배너 */
+.waking-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex-shrink: 0;
+  padding: 9px 16px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.wake-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--accent);
+  animation: wake-pulse 1.1s ease-in-out infinite;
+}
+@keyframes wake-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+.wake-slide-enter-active,
+.wake-slide-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.wake-slide-enter-from,
+.wake-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-100%);
 }
 
 @media (max-width: 720px) {

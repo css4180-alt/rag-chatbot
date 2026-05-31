@@ -6,6 +6,7 @@ import {
   getMessages,
   listDocuments,
   listSessions,
+  setWakingHandler,
   uploadDocument,
 } from './api/client.js'
 
@@ -25,8 +26,15 @@ export const store = reactive({
   globalDocs: [],
   sessionDocs: [],
 
+  // 서버 콜드 스타트(깨어나는 중) 여부
+  waking: false,
+
   // ---- 초기화 ----
   async init() {
+    // 콜드 스타트 중에는 API 클라이언트가 이 플래그를 켜고 끈다.
+    setWakingHandler((active) => {
+      this.waking = active
+    })
     await this.loadSessions()
     await this.loadGlobalDocs()
     const saved = Number(localStorage.getItem(ACTIVE_KEY))
