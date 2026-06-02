@@ -30,7 +30,7 @@ services:
       - "443:443"
     environment:
       # 비어 있으면 빌드/기동 시 알려주도록 기본값을 두지 않는다.
-      - SITE_ADDRESS=${SITE_ADDRESS:?SITE_ADDRESS(도메인)를 지정하세요. 예: SITE_ADDRESS=myrag.duckdns.org}
+      - "SITE_ADDRESS=${SITE_ADDRESS:?SITE_ADDRESS(도메인)를 지정하세요}"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

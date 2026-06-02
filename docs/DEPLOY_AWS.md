@@ -11,16 +11,24 @@ LLM·임베딩을 **AWS Bedrock**(Claude + Titan)으로 호출하고, 앱은 **E
 
 ---
 
-## 1. Bedrock 모델 액세스 활성화 (먼저!)
+## 1. Bedrock 모델 사용 가능 상태 확인 (먼저!)
+
+> **변경 사항**: 예전의 **Model access**(모델 액세스) 페이지는 폐지되었다.
+> 이제 서버리스 파운데이션 모델은 **해당 리전에서 첫 호출 시 자동으로 활성화**된다.
+> 따라서 모델을 미리 일일이 켤 필요가 없다. 단, Anthropic(Claude)은 **처음 쓰는
+> 계정**일 경우 한 번 **사용 사례(use case) 정보 제출**을 요구할 수 있다.
 
 1. AWS 콘솔 우상단 리전을 **N. Virginia (us-east-1)** 로 변경
-2. **Bedrock** 검색 → 좌측 **Model access** → **Manage model access / Enable specific models**
-3. 다음 두 모델을 **활성화**(요청 즉시 승인됨):
-   - **Anthropic — Claude 3 Haiku**
-   - **Amazon — Titan Text Embeddings V2**
-4. 상태가 **Access granted** 로 바뀌면 완료
+2. **Bedrock** 검색 → 좌측 **Chat / Text Playground**(또는 **Model catalog**) 이동
+3. **Claude 3 Haiku** 선택:
+   - 처음이라면 **사용 사례 정보 제출** 폼이 뜰 수 있다 → 회사명/용도 등 간단히 입력
+     (예: 개인 RAG 데모) 후 제출. 보통 즉시 승인된다.
+   - Playground에서 짧은 문장을 한 번 보내 응답이 오면 호출 가능 상태다.
+4. **Titan Text Embeddings V2** 도 Playground/카탈로그에서 한 번 호출되는지 확인
+   (임베딩은 보통 사용 사례 제출 없이 바로 호출된다).
 
-> 다른 리전을 쓰려면 그 리전에서 모델 액세스를 따로 켜고 `.env`의 `AWS_REGION`을 맞춘다.
+> 다른 리전을 쓰려면 `.env`의 `AWS_REGION`을 그 리전으로 맞추고, 그 리전에서
+> 같은 방식으로 첫 호출만 확인하면 된다.
 > Claude 3.5 Haiku 를 쓰려면 추론 프로파일 ID(`us.anthropic.claude-3-5-haiku-...`)가
 > 필요할 수 있다. 가장 단순한 조합은 위의 Claude 3 Haiku(온디맨드)다.
 
