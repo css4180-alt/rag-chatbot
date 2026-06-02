@@ -52,13 +52,13 @@ rag-chatbot/
 | Web framework | FastAPI |
 | ORM | SQLAlchemy 2.0 (sync) |
 | Validation | Pydantic v2 + pydantic-settings |
-| LLM | Google Gemini 2.0 Flash (`langchain-google-genai`) |
-| Embedding | `intfloat/multilingual-e5-small` via `langchain-community` HuggingFaceEmbeddings |
+| LLM | AWS Bedrock — Claude 3.5 Haiku (`langchain-aws` `ChatBedrockConverse`) |
+| Embedding | AWS Bedrock — Amazon Titan Text Embeddings V2 (`langchain-aws` `BedrockEmbeddings`) |
 | Vector DB | ChromaDB (local file, `langchain-chroma`) |
 | Metadata DB | SQLite |
 | Frontend | Vue 3 + Vite |
 | Container | Docker (single container) |
-| Deployment | Fly.io |
+| Deployment | AWS EC2 (Docker + Caddy 자동 HTTPS) |
 | CI/CD | GitHub Actions |
 | Testing | pytest + httpx |
 

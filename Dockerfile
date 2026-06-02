@@ -18,18 +18,12 @@ WORKDIR /app
 
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
-# HuggingFace 모델 캐시 경로를 쓰기 가능한 위치로 고정.
-# (appuser는 홈 디렉터리가 없어 기본 캐시 경로 /home/appuser/.cache 에 쓸 수 없음)
-ENV HF_HOME=/app/hf_cache
-
 COPY --from=py-builder /install /usr/local
 COPY backend/app/ ./app/
 COPY --from=frontend-builder /frontend/dist ./static/
 
-# 임베딩 모델을 빌드 시점에 이미지로 미리 내려받는다.
-# → 런타임 권한 에러 제거 + 콜드 스타트 단축(첫 질문 시 다운로드 안 함).
-RUN python -c "from langchain_community.embeddings import HuggingFaceEmbeddings; HuggingFaceEmbeddings(model_name='intfloat/multilingual-e5-small', model_kwargs={'device': 'cpu'})"
-
+# 임베딩/LLM은 AWS Bedrock API로 호출하므로 로컬 모델 적재가 없다.
+# → 이미지가 가볍고(torch 미포함) 콜드 스타트가 없다.
 RUN mkdir -p data/chroma data/sqlite && chown -R appuser:appgroup /app
 
 USER appuser

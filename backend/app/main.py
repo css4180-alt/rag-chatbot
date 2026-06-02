@@ -1,6 +1,5 @@
 import logging
 import os
-import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -14,30 +13,13 @@ from app.db.database import Base, engine, run_lightweight_migrations
 logger = logging.getLogger("uvicorn.error")
 
 
-def _warm_embedder() -> None:
-    """임베딩 모델을 백그라운드에서 미리 메모리에 적재한다.
-
-    머신이 자동 중지(min_machines_running=0)되는 환경이라 매번 콜드 스타트가
-    발생한다. 첫 질문 때 모델을 적재하면 그 요청이 수십 초간 지연되므로,
-    서버 기동 직후 별도 스레드에서 미리 워밍업해 첫 응답 지연을 없앤다.
-    포트 바인딩을 막지 않도록 스레드로 분리한다.
-    """
-    try:
-        from app.core.embedder import get_embedder
-
-        get_embedder()
-        logger.info("Embedding model warmed up.")
-    except Exception as exc:  # noqa: BLE001 - 워밍업 실패가 기동을 막으면 안 됨
-        logger.warning("Embedder warm-up failed (lazy load on first use): %s", exc)
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # 임베딩/LLM을 Bedrock API로 호출하므로 로컬 모델 워밍업이 필요 없다.
     os.makedirs("data/sqlite", exist_ok=True)
     os.makedirs("data/chroma", exist_ok=True)
     Base.metadata.create_all(bind=engine)
     run_lightweight_migrations()
-    threading.Thread(target=_warm_embedder, daemon=True).start()
     yield
 
 
