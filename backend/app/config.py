@@ -22,8 +22,11 @@ class Settings(BaseSettings):
     # retrieval_score_threshold: 코사인 관련도 점수(0~1)가 이 값 미만인 청크는
     #   버린다. 질문과 무관한 문서가 출처/컨텍스트에 섞이는 것을 막는다.
     #   값이 높을수록 엄격(관련도 높은 것만), 낮을수록 관대.
+    #   주의: 한 질문에 여러 주제를 섞으면 임베딩이 희석돼 관련도가 낮아진다.
+    #   0.3 은 단일 주제엔 좋지만 복합 질문은 통째로 걸러버려, 0.2 로 완화한다.
+    #   (실측: 무관 문서 ~0.05~0.10, 단일 주제 관련 ~0.7, 복합 질문 ~0.25~0.35)
     retrieval_k: int = 4
-    retrieval_score_threshold: float = 0.3
+    retrieval_score_threshold: float = 0.2
 
     # --- 접근 제어 / 토큰 쿼터 (공개 데모 비용 보호) ---
     # ACCESS_CODES: "패스코드:계정,패스코드:계정" 형식. 비워두면 인증/쿼터가
