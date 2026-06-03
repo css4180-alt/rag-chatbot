@@ -14,9 +14,22 @@
         :class="{ active: s.id === store.activeSessionId }"
         @click="store.selectSession(s.id)"
       >
-        <span class="conv-title">{{ s.title || '새 대화' }}</span>
+        <input
+          v-if="editingId === s.id"
+          ref="editInput"
+          v-model="editText"
+          class="conv-edit"
+          @click.stop
+          @keydown.enter.prevent="onEnter($event, s)"
+          @keydown.esc.prevent="cancelRename"
+          @blur="commitRename(s)"
+        />
+        <span v-else class="conv-title" @dblclick.stop="startRename(s)">{{ s.title || '새 대화' }}</span>
         <span class="conv-time">{{ relTime(s.last_message_at) }}</span>
-        <button class="conv-del" title="대화 삭제" @click.stop="confirmDelete(s)">✕</button>
+        <span class="conv-actions">
+          <button class="conv-edit-btn" title="제목 수정" @click.stop="startRename(s)">✎</button>
+          <button class="conv-del" title="대화 삭제" @click.stop="confirmDelete(s)">✕</button>
+        </span>
       </li>
     </ul>
     <div v-else class="conv-empty">
@@ -27,7 +40,47 @@
 </template>
 
 <script setup>
+import { nextTick, ref } from 'vue'
 import { store } from '../store.js'
+
+const editingId = ref(null)
+const editText = ref('')
+const editInput = ref(null)
+
+async function startRename(s) {
+  editingId.value = s.id
+  editText.value = s.title || ''
+  await nextTick()
+  // v-for 안의 ref 는 배열로 모일 수 있어 첫 요소를 집어 포커스/전체선택.
+  const el = Array.isArray(editInput.value) ? editInput.value[0] : editInput.value
+  el?.focus()
+  el?.select()
+}
+
+function cancelRename() {
+  editingId.value = null
+  editText.value = ''
+}
+
+// 한글 등 IME 조합 중에 눌린 Enter 는 글자 확정용이므로 저장하지 않는다.
+// (그대로 저장하면 조합 중이던 마지막 글자가 빠진 채로 저장된다.)
+function onEnter(e, s) {
+  if (e.isComposing || e.keyCode === 229) return
+  commitRename(s)
+}
+
+async function commitRename(s) {
+  if (editingId.value !== s.id) return
+  const next = editText.value.trim()
+  editingId.value = null
+  // 비었거나 변동 없으면 무시.
+  if (!next || next === (s.title || '')) return
+  try {
+    await store.renameSession(s.id, next)
+  } catch (e) {
+    alert(e.message || '제목 수정에 실패했습니다.')
+  }
+}
 
 function relTime(iso) {
   if (!iso) return ''
@@ -99,7 +152,7 @@ async function confirmDelete(s) {
 .conv-item {
   display: grid;
   grid-template-columns: 1fr auto;
-  grid-template-areas: 'title del' 'time del';
+  grid-template-areas: 'title actions' 'time actions';
   align-items: center;
   gap: 0 6px;
   padding: 9px 10px;
@@ -109,7 +162,7 @@ async function confirmDelete(s) {
   transition: background 0.14s, border-color 0.14s;
 }
 .conv-item:hover { background: var(--surface-2); }
-.conv-item:hover .conv-del { opacity: 1; }
+.conv-item:hover .conv-actions { opacity: 1; }
 .conv-item.active {
   background: var(--accent-soft);
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
@@ -130,8 +183,17 @@ async function confirmDelete(s) {
   font-size: 0.64rem;
   color: var(--ink-faint);
 }
+.conv-actions {
+  grid-area: actions;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.14s;
+}
+.conv-item.active .conv-actions { opacity: 1; }
+.conv-edit-btn,
 .conv-del {
-  grid-area: del;
   background: none;
   border: none;
   cursor: pointer;
@@ -139,10 +201,24 @@ async function confirmDelete(s) {
   font-size: 0.72rem;
   padding: 4px;
   border-radius: 5px;
-  opacity: 0;
-  transition: opacity 0.14s, color 0.14s, background 0.14s;
+  transition: color 0.14s, background 0.14s;
 }
+.conv-edit-btn:hover { color: var(--accent); background: var(--surface); }
 .conv-del:hover { color: var(--danger); background: var(--surface); }
+
+.conv-edit {
+  grid-area: title;
+  width: 100%;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  padding: 2px 6px;
+  outline: none;
+}
+.conv-edit:focus { box-shadow: 0 0 0 2px var(--accent-soft); }
 
 .conv-empty {
   margin-top: 12px;

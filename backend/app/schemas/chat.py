@@ -31,6 +31,10 @@ class ChatMessageResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ChatSessionUpdate(BaseModel):
+    title: str
+
+
 class ChatSessionResponse(BaseModel):
     id: int
     title: str | None = None

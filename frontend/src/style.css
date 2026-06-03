@@ -1,11 +1,13 @@
 /* ============================================================
-   RAG Chatbot — Design tokens
-   "Editorial Knowledge Base": warm paper, ink, emerald accent.
+   RAG Chatbot — Design system
+   "Reading Room": warm bone paper, charcoal ink, terracotta accent.
+   Editorial serif display (Fraunces) + Pretendard body + mono metadata.
    Auto light/dark via prefers-color-scheme.
    ============================================================ */
 
 :root {
   /* Typography */
+  --font-display: 'Fraunces', 'Pretendard', Georgia, 'Times New Roman', serif;
   --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
@@ -80,10 +82,13 @@ body {
   font-size: 15px;
   line-height: 1.6;
   color: var(--ink);
-  background: var(--paper);
+  background-color: var(--paper);
+  /* faint paper grain — adds depth without busy-ness */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: 'ss01', 'cv11';
 }
 
 #app {
@@ -94,6 +99,11 @@ body {
 button,
 input {
   font-family: inherit;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 /* Thin, characterful scrollbars */

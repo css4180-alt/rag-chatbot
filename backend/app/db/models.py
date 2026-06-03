@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
@@ -51,3 +51,20 @@ class ChatMessage(Base):
 
     def set_sources(self, sources: list) -> None:
         self.sources = json.dumps(sources)
+
+
+class TokenUsage(Base):
+    """일자별·범위별 LLM 토큰 누적 사용량.
+
+    ``scope`` 는 계정 라벨이거나 사이트 전체를 뜻하는 특수값(``__site__``)이다.
+    ``usage_date`` 는 UTC 기준 ``YYYY-MM-DD`` 문자열로, 매일 새 행이 만들어져
+    자정마다 자연스럽게 리셋되는 효과를 낸다.
+    """
+
+    __tablename__ = "token_usage"
+    __table_args__ = (UniqueConstraint("scope", "usage_date", name="uq_scope_date"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    scope: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    usage_date: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    total_tokens: Mapped[int] = mapped_column(Integer, default=0, nullable=False)

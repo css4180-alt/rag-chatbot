@@ -45,3 +45,8 @@ logs/
 # Coverage
 .coverage
 htmlcov/
+
+# 로컬 테스트용 샘플(커밋하지 않음 — 가상 데이터/생성 스크립트)
+/samples/
+/sample-*.pdf
+/scripts/

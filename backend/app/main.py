@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import chat, documents
+from app.api import auth, chat, documents
 from app.db.database import Base, engine, run_lightweight_migrations
 
 logger = logging.getLogger("uvicorn.error")
@@ -38,6 +38,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(documents.router)
 app.include_router(chat.router)
 

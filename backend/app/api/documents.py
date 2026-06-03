@@ -4,6 +4,7 @@ import tempfile
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
+from app.core.auth import get_account
 from app.core.ingestion import ALLOWED_SUFFIXES, delete_document_chunks, ingest_document
 from app.db.database import get_db
 from app.db.models import ChatSession, Document
@@ -17,6 +18,7 @@ def upload_document(
     file: UploadFile = File(...),
     session_id: int | None = Form(None),
     db: Session = Depends(get_db),
+    account: str = Depends(get_account),
 ):
     """문서를 업로드한다.
 

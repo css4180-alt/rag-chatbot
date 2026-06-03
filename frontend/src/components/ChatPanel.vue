@@ -9,12 +9,7 @@
           </svg>
         </span>
         <h3>무엇이든 물어보세요</h3>
-        <p>왼쪽에서 문서를 업로드한 뒤, 내용을 자연어로 질문하면<br />근거가 되는 출처와 함께 답변해 드립니다.</p>
-        <div class="hint-chips">
-          <span>요약해줘</span>
-          <span>핵심만 정리해줘</span>
-          <span>이 문서의 결론은?</span>
-        </div>
+        <p>오른쪽에서 문서를 업로드한 뒤, 내용을 질문하면<br />근거가 되는 출처와 함께 답변해 드립니다.</p>
       </div>
 
       <div
@@ -148,9 +143,10 @@ function send() {
   margin-bottom: 18px;
 }
 .welcome h3 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   color: var(--ink);
   margin-bottom: 8px;
 }
@@ -158,22 +154,6 @@ function send() {
   font-size: 0.9rem;
   line-height: 1.7;
   color: var(--ink-soft);
-}
-.hint-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 20px;
-}
-.hint-chips span {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  color: var(--ink-soft);
-  padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: 99px;
-  background: var(--surface);
 }
 @keyframes rise {
   from { opacity: 0; transform: translateY(10px); }
