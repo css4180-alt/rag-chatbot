@@ -41,6 +41,9 @@ export const store = reactive({
   // 서버 콜드 스타트(깨어나는 중) 여부
   waking: false,
 
+  // 세션 복원(새로고침)이 아닌 실제 로그인 직후인지 여부 — 튜토리얼 표시 판단에 사용
+  freshLogin: false,
+
   // ---- 초기화 ----
   async init() {
     // 콜드 스타트 중에는 API 클라이언트가 이 플래그를 켜고 끈다.
@@ -71,12 +74,14 @@ export const store = reactive({
 
   async login(passcode) {
     const data = await login(passcode)
+    this.freshLogin = true
     this.applyAuth(data.quota)
     await this.loadAfterAuth()
   },
 
   logout() {
     setToken(null)
+    this.freshLogin = false
     this.authed = false
     this.account = null
     this.quota = null

@@ -53,6 +53,7 @@
       <ChatPanel />
       <DocumentPanel />
     </main>
+    <TutorialOverlay />
   </div>
 </template>
 
@@ -62,6 +63,7 @@ import ConversationSidebar from './components/ConversationSidebar.vue'
 import DocumentPanel from './components/DocumentPanel.vue'
 import ChatPanel from './components/ChatPanel.vue'
 import LoginGate from './components/LoginGate.vue'
+import TutorialOverlay from './components/TutorialOverlay.vue'
 import { store } from './store.js'
 
 onMounted(() => store.init())

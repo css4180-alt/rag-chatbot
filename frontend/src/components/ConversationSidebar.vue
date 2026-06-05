@@ -36,6 +36,26 @@
       <p>아직 대화가 없습니다.</p>
       <p class="muted">질문을 보내면 대화가 저장됩니다.</p>
     </div>
+
+    <!-- 샘플 문서 (하단 고정) -->
+    <div class="samples-drawer">
+      <button id="tutorial-samples" class="samples-toggle" @click="showSamples = !showSamples">
+        <span>샘플 문서 내려받기</span>
+        <span class="samples-chevron" :class="{ open: showSamples }">▾</span>
+      </button>
+      <ul v-if="showSamples" class="samples-list">
+        <li v-for="s in samples" :key="s.file">
+          <a class="sample-item" :href="`/samples/${s.file}`" :download="s.file">
+            <span class="sample-dl" aria-hidden="true">↓</span>
+            <span class="sample-text">
+              <span class="sample-name">{{ s.name }}</span>
+              <small class="sample-desc">{{ s.desc }}</small>
+            </span>
+            <span class="sample-ext">{{ s.ext }}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
   </aside>
 </template>
 
@@ -46,6 +66,14 @@ import { store } from '../store.js'
 const editingId = ref(null)
 const editText = ref('')
 const editInput = ref(null)
+
+const showSamples = ref(false)
+const samples = [
+  { file: '루미나 X100 카메라 설명서.txt', name: '루미나 X100 카메라 설명서', desc: '미러리스 카메라 매뉴얼', ext: 'TXT' },
+  { file: '오빗모빌리티 서비스 안내.md',   name: '오빗모빌리티 서비스 안내', desc: '전동 스쿠터 공유 서비스', ext: 'MD'  },
+  { file: '스텔라뱅크 FAQ.md',             name: '스텔라뱅크 FAQ',           desc: '인터넷전문은행 안내',    ext: 'MD'  },
+  { file: '가든카페 운영 핸드북.pdf',       name: '가든카페 운영 핸드북',     desc: '카페 운영 가이드',       ext: 'PDF' },
+]
 
 async function startRename(s) {
   editingId.value = s.id
@@ -104,8 +132,8 @@ async function confirmDelete(s) {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  width: 240px;
-  min-width: 240px;
+  width: 245px;
+  min-width: 245px;
   padding: 18px 14px;
   background: var(--surface);
   border-right: 1px solid var(--line);
@@ -227,4 +255,97 @@ async function confirmDelete(s) {
   color: var(--ink-soft);
 }
 .conv-empty .muted { color: var(--ink-faint); font-size: 0.74rem; margin-top: 4px; }
+
+/* 샘플 문서 드로어 */
+.samples-drawer {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.samples-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 6px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  transition: background 0.14s, color 0.14s;
+}
+.samples-toggle:hover { background: var(--surface-2); color: var(--ink-soft); }
+.samples-chevron { transition: transform 0.2s; }
+.samples-chevron.open { transform: rotate(180deg); }
+
+.samples-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sample-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.16s, background 0.16s;
+}
+.sample-item:hover { border-color: var(--accent); background: var(--accent-soft); }
+.sample-dl {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.sample-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.sample-name {
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sample-desc {
+  font-size: 0.64rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sample-ext {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
 </style>

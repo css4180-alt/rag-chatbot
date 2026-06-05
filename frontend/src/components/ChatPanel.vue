@@ -45,6 +45,7 @@
         v-model="input"
         placeholder="질문을 입력하세요…"
         :disabled="store.streaming"
+        id="tutorial-input"
         class="chat-input"
       />
       <button type="submit" :disabled="store.streaming || !input.trim()" class="send-btn">
