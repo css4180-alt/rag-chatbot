@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: 테스트
     runs-on: ubuntu-latest
 
     steps:
@@ -28,3 +29,22 @@ jobs:
       - name: 테스트 실행
         working-directory: backend
         run: python3 -m pytest
+
+  deploy:
+    name: 배포
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: EC2 배포
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            cd ~/rag-chatbot
+            git pull
+            SITE_ADDRESS=${{ secrets.SITE_ADDRESS }} docker compose up -d --build
