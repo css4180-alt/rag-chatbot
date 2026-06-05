@@ -1,8 +1,8 @@
 <template>
   <Teleport to="body">
     <div v-if="visible" class="t-back">
-      <div class="t-spotlight" :style="spotlightStyle" />
-      <div ref="bubbleEl" class="t-bubble" :class="`side-${step.side}`" :style="bubbleStyle">
+      <div :key="`spot-${curr}`" class="t-spotlight" :style="spotlightStyle" />
+      <div :key="`bubble-${curr}`" ref="bubbleEl" class="t-bubble" :class="`side-${step.side}`" :style="bubbleStyle">
         <div class="t-badge">{{ curr + 1 }} / {{ STEPS.length }}</div>
         <p class="t-title">{{ step.title }}</p>
         <p class="t-text">{{ step.text }}</p>
@@ -127,10 +127,15 @@ const bubbleStyle = computed(() => {
   return style
 })
 
-function advance() {
+async function advance() {
   if (curr.value < STEPS.length - 1) {
-    curr.value++
-    nextTick(updateRect)
+    const nextIdx = curr.value + 1
+    const el = document.getElementById(STEPS[nextIdx].target)
+    // curr과 spotRect을 같은 틱에 동시에 업데이트 → Vue가 한 번에 렌더링해 깜빡임 없음
+    spotRect.value = el ? el.getBoundingClientRect() : null
+    curr.value = nextIdx
+    await nextTick()
+    if (bubbleEl.value) bubbleH.value = bubbleEl.value.offsetHeight
   } else {
     finish()
   }
@@ -174,7 +179,6 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     0 0 0 2px var(--accent);
   pointer-events: none;
   z-index: 1;
-  animation: t-back-in 0.22s ease both;
 }
 
 /* 말풍선 */
