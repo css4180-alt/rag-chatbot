@@ -10,9 +10,10 @@
         </svg>
       </span>
       <h1 class="gate-title">RAG Chatbot</h1>
-      <p class="gate-sub">문서 기반 질의응답 · 데모 접속</p>
+      <p class="gate-sub">문서 기반 질의응답</p>
       <p class="gate-note">
-        공개 데모입니다. 비용 보호를 위해 <strong>패스코드</strong>로 접속하며,
+        일부 공개 데모입니다. 비용 보호를 위해 <strong>패스코드</strong>로 접속하며,
+        <br />
         계정마다 하루 사용량이 제한됩니다.
       </p>
 
@@ -34,10 +35,6 @@
       <transition name="fade">
         <p v-if="error" class="gate-error">{{ error }}</p>
       </transition>
-
-      <a class="gate-link" href="https://github.com/css4180-alt/rag-chatbot" target="_blank" rel="noopener">
-        소스 코드 (GitHub)
-      </a>
     </div>
   </div>
 </template>
@@ -81,7 +78,7 @@ async function submit() {
 
 .gate-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
