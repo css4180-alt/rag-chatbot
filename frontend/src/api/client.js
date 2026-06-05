@@ -157,6 +157,23 @@ export async function deleteDocument(id) {
   if (!res.ok) throw new Error('삭제 실패')
 }
 
+/** 원본 다운로드 URL(첨부). 인증 불필요하므로 <a href>에 바로 쓸 수 있다. */
+export function documentDownloadUrl(id) {
+  return `${BASE}/documents/${id}/download`
+}
+
+/** 원본 인라인 URL(미리보기). PDF는 <iframe src>로, 텍스트는 fetch로 사용한다. */
+export function documentRawUrl(id) {
+  return `${BASE}/documents/${id}/raw`
+}
+
+/** 텍스트(.txt/.md) 미리보기용 원본 텍스트를 가져온다. */
+export async function fetchDocumentText(id) {
+  const res = await fetchRetry(documentRawUrl(id))
+  if (!res.ok) throw new Error('미리보기를 불러오지 못했습니다.')
+  return res.text()
+}
+
 // ---- 대화(세션) ----
 
 export async function listSessions() {

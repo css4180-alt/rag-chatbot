@@ -54,6 +54,7 @@
       <DocumentPanel />
     </main>
     <TutorialOverlay />
+    <DocPreviewModal />
   </div>
 </template>
 
@@ -64,6 +65,7 @@ import DocumentPanel from './components/DocumentPanel.vue'
 import ChatPanel from './components/ChatPanel.vue'
 import LoginGate from './components/LoginGate.vue'
 import TutorialOverlay from './components/TutorialOverlay.vue'
+import DocPreviewModal from './components/DocPreviewModal.vue'
 import { store } from './store.js'
 
 onMounted(() => store.init())

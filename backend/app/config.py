@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     # 저장소
     database_url: str = "sqlite:///./data/sqlite/app.db"
     chroma_persist_dir: str = "./data/chroma"
+    # 업로드 원본 파일 보관 디렉터리. 다운로드·미리보기를 위해 원본을 유지한다.
+    upload_dir: str = "./data/uploads"
 
     # --- 검색(retrieval) ---
     # retrieval_k: 후보로 가져올 최대 청크 수.

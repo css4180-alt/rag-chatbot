@@ -18,21 +18,29 @@
         class="message"
         :class="msg.role"
       >
-        <span class="role-tag">{{ msg.role === 'user' ? 'YOU' : 'AI' }}</span>
         <div class="bubble">
           <span class="text">{{ msg.content }}</span>
           <div v-if="msg.sources?.length" class="sources">
             <span class="sources-label">참조 문서</span>
-            <span v-for="(src, j) in dedupeSources(msg.sources)" :key="j" class="source-tag">
+            <button
+              v-for="(src, j) in dedupeSources(msg.sources)"
+              :key="j"
+              class="source-tag"
+              data-tip="미리보기"
+              @click="store.openPreview(src)"
+            >
               {{ src.filename }}
-            </span>
+              <svg class="source-eye" aria-hidden="true" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+                <circle cx="12" cy="12" r="2.6" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
 
       <!-- 스트리밍 중인 답변 -->
       <div v-if="store.streaming" class="message assistant">
-        <span class="role-tag">AI</span>
         <div class="bubble">
           <span v-if="store.streamingText" class="text">{{ store.streamingText }}<span class="cursor">▋</span></span>
           <span v-else class="typing" aria-label="생각 중"><i></i><i></i><i></i></span>
@@ -101,28 +109,15 @@ function send() {
   min-width: 0;
   overflow: hidden;
   background: var(--paper);
-  position: relative;
-}
-/* subtle dotted paper texture */
-.chat-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(var(--line) 1px, transparent 1px);
-  background-size: 22px 22px;
-  opacity: 0.35;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent 60%);
 }
 
 .messages {
   flex: 1;
   overflow-y: auto;
-  padding: 28px clamp(16px, 5vw, 56px);
+  padding: 32px clamp(16px, 5vw, 56px);
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  position: relative;
+  gap: 28px;
 }
 
 /* Empty state */
@@ -164,41 +159,53 @@ function send() {
 .message {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  max-width: min(76%, 680px);
-  animation: rise 0.32s ease;
+  gap: 6px;
+  animation: rise 0.28s ease;
 }
-.message.user { align-self: flex-end; align-items: flex-end; }
-.message.assistant { align-self: flex-start; align-items: flex-start; }
+.message.user {
+  align-self: flex-end;
+  align-items: flex-end;
+  max-width: min(72%, 600px);
+}
+.message.assistant {
+  align-self: flex-start;
+  align-items: flex-start;
+  max-width: min(92%, 760px);
+}
 
 .role-tag {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   color: var(--ink-faint);
-  padding: 0 4px;
+  padding: 0 2px;
 }
+.message.assistant .role-tag { color: var(--accent); }
 
+/* 사용자 말풍선 */
 .bubble {
-  padding: 12px 16px;
-  border-radius: var(--radius);
   font-size: 0.92rem;
-  line-height: 1.62;
+  line-height: 1.65;
   white-space: pre-wrap;
   word-break: break-word;
-  box-shadow: var(--shadow-sm);
 }
 .user .bubble {
   background: var(--user-bubble);
   color: var(--user-ink);
+  padding: 10px 16px;
+  border-radius: 18px;
   border-bottom-right-radius: 5px;
+  box-shadow: var(--shadow-sm);
 }
+
+/* AI 응답 — 말풍선 없이 텍스트만 */
 .assistant .bubble {
-  background: var(--surface);
+  background: transparent;
   color: var(--ink);
-  border: 1px solid var(--line);
-  border-bottom-left-radius: 5px;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .cursor {
@@ -229,9 +236,9 @@ function send() {
 
 /* Sources */
 .sources {
-  margin-top: 10px;
-  padding-top: 9px;
-  border-top: 1px dashed var(--line-strong);
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -242,16 +249,55 @@ function send() {
   font-size: 0.62rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--ink-soft);
 }
 .source-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-family: var(--font-mono);
   font-size: 0.7rem;
   background: var(--accent-soft);
   color: var(--accent);
   padding: 3px 8px;
+  border: 1px solid transparent;
   border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.16s, background 0.16s;
 }
+.source-tag:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.source-tag::after {
+  content: attr(data-tip);
+  pointer-events: none;
+  position: absolute;
+  bottom: calc(100% + 5px);
+  right: 0;
+  transform: translateY(2px) scale(0.9);
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 0.67rem;
+  font-weight: 500;
+  color: var(--surface);
+  background: var(--ink);
+  padding: 3px 7px;
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 10;
+}
+.source-tag:hover::after {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.source-eye {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.source-tag:hover .source-eye { opacity: 1; }
 
 /* Composer */
 .input-row {

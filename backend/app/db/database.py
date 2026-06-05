@@ -37,6 +37,8 @@ def run_lightweight_migrations() -> None:
         cols = {c["name"] for c in inspector.get_columns("documents")}
         if "session_id" not in cols:
             pending.append("ALTER TABLE documents ADD COLUMN session_id INTEGER")
+        if "storage_path" not in cols:
+            pending.append("ALTER TABLE documents ADD COLUMN storage_path VARCHAR(500)")
 
     if pending:
         with engine.begin() as conn:

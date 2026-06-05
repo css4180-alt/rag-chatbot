@@ -20,10 +20,10 @@
 
     <div class="divider"></div>
 
-    <!-- 이 대화 문서 -->
+    <!-- 현재 대화 문서 -->
     <section class="doc-section">
       <div class="sec-head">
-        <h2>이 대화 문서</h2>
+        <h2>현재 대화 문서</h2>
         <span class="count" v-if="store.sessionDocs.length">{{ store.sessionDocs.length }}</span>
       </div>
       <p class="sec-desc">현재 대화에서만 참조됩니다.</p>

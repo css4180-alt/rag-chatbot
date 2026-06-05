@@ -19,6 +19,14 @@ class Document(Base):
     session_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("chat_sessions.id"), nullable=True, index=True
     )
+    # 업로드된 원본 파일의 디스크 경로. 다운로드·미리보기에 사용한다.
+    # NULL이면 이 기능 도입 이전에 올라온 문서(원본 미보관).
+    storage_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+    @property
+    def has_file(self) -> bool:
+        """다운로드·미리보기가 가능한(원본이 보관된) 문서인지 여부."""
+        return bool(self.storage_path)
 
 
 class ChatSession(Base):

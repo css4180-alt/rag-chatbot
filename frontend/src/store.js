@@ -41,6 +41,9 @@ export const store = reactive({
   // 서버 콜드 스타트(깨어나는 중) 여부
   waking: false,
 
+  // 문서 미리보기 모달 — { id, filename } 또는 null
+  preview: null,
+
   // 세션 복원(새로고침)이 아닌 실제 로그인 직후인지 여부 — 튜토리얼 표시 판단에 사용
   freshLogin: false,
 
@@ -166,6 +169,17 @@ export const store = reactive({
       localStorage.removeItem(ACTIVE_KEY)
       await this.newConversation()
     }
+  },
+
+  // ---- 문서 미리보기 ----
+  openPreview(doc) {
+    // doc: { document_id?|id, filename }
+    const id = doc.document_id ?? doc.id
+    if (id == null) return
+    this.preview = { id, filename: doc.filename }
+  },
+  closePreview() {
+    this.preview = null
   },
 
   // ---- 문서 ----

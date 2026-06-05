@@ -3,7 +3,27 @@
     <li v-for="doc in docs" :key="doc.id" class="doc-item" :class="doc.status">
       <span class="doc-dot" :class="doc.status" aria-hidden="true"></span>
       <span class="doc-name" :title="doc.filename">{{ doc.filename }}</span>
-      <button class="del-btn" title="삭제" @click="$emit('delete', { id: doc.id, scope })">✕</button>
+      <span class="doc-tools">
+        <button
+          v-if="doc.has_file"
+          class="tool-btn"
+          data-tip="미리보기"
+          @click="store.openPreview(doc)"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+            <circle cx="12" cy="12" r="2.6" />
+          </svg>
+        </button>
+        <a
+          v-if="doc.has_file"
+          class="tool-btn"
+          data-tip="다운로드"
+          :href="documentDownloadUrl(doc.id)"
+          :download="doc.filename"
+        >↓</a>
+        <button class="tool-btn del" data-tip="삭제" @click="$emit('delete', { id: doc.id, scope })">✕</button>
+      </span>
       <span class="doc-meta">{{ doc.chunk_count }} chunks · {{ statusLabel(doc.status) }}</span>
     </li>
   </ul>
@@ -11,6 +31,9 @@
 </template>
 
 <script setup>
+import { store } from '../store.js'
+import { documentDownloadUrl } from '../api/client.js'
+
 defineProps({
   docs: { type: Array, required: true },
   scope: { type: String, required: true },
@@ -74,17 +97,55 @@ function statusLabel(status) {
   color: var(--ink-faint);
   white-space: nowrap;
 }
-.del-btn {
+.doc-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+.tool-btn {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
   background: none;
   border: none;
   cursor: pointer;
+  text-decoration: none;
   color: var(--ink-faint);
-  font-size: 0.72rem;
-  padding: 2px 4px;
+  font-size: 0.78rem;
+  line-height: 1;
+  padding: 0 4px;
   border-radius: 5px;
   transition: color 0.16s, background 0.16s;
 }
-.del-btn:hover { color: var(--danger); background: var(--surface-2); }
+.tool-btn:hover { color: var(--accent); background: var(--surface-2); }
+.tool-btn.del:hover { color: var(--danger); background: var(--surface-2); }
+
+/* CSS 툴팁 — data-tip 속성 값을 말풍선으로 표시 */
+.tool-btn::after {
+  content: attr(data-tip);
+  pointer-events: none;
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 0.67rem;
+  font-weight: 500;
+  color: var(--surface);
+  background: var(--ink);
+  padding: 3px 7px;
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 10;
+}
+.tool-btn:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
 
 .empty {
   font-size: 0.78rem;

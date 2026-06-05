@@ -12,9 +12,9 @@
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
   /* Light theme — warm paper */
-  --paper: #f7f6f1;
-  --surface: #fffefb;
-  --surface-2: #f1efe8;
+  --paper: #f5f5f4;
+  --surface: #fdfdfc;
+  --surface-2: #efefee;
   --ink: #1b1a17;
   --ink-soft: #56534c;
   --ink-faint: #8f8b81;
@@ -27,8 +27,8 @@
   --accent-ink: #ffffff;
 
   --danger: #b3402d;
-  --user-bubble: #1b1a17;
-  --user-ink: #f7f6f1;
+  --user-bubble: #e3e3e1;
+  --user-ink: #1b1a17;
 
   --shadow-sm: 0 1px 2px rgba(27, 26, 23, 0.06), 0 1px 3px rgba(27, 26, 23, 0.05);
   --shadow-md: 0 4px 6px -2px rgba(27, 26, 23, 0.08), 0 12px 24px -8px rgba(27, 26, 23, 0.12);
@@ -41,26 +41,27 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #14151a;
-    --surface: #1b1d24;
-    --surface-2: #23262f;
-    --ink: #ecebe6;
-    --ink-soft: #a7a59d;
-    --ink-faint: #6f6d66;
-    --line: #2c2f39;
-    --line-strong: #3a3e4a;
+    /* Claude Code 다크 모드 톤 — 중성 다크 그레이 */
+    --paper: #1f1f1e;
+    --surface: #262626;
+    --surface-2: #2e2e2d;
+    --ink: #e8e7e3;
+    --ink-soft: #9a9996;
+    --ink-faint: #8a8a86;
+    --line: #333333;
+    --line-strong: #444444;
 
     --accent: #3dd1a4;
     --accent-strong: #5bdcb4;
-    --accent-soft: rgba(61, 209, 164, 0.13);
-    --accent-ink: #0c1512;
+    --accent-soft: rgba(61, 209, 164, 0.12);
+    --accent-ink: #0b1410;
 
-    --danger: #f0795f;
-    --user-bubble: #3dd1a4;
-    --user-ink: #0c1512;
+    --danger: #f07060;
+    --user-bubble: #1e3a30;
+    --user-ink: #d4f0e6;
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 6px 14px -4px rgba(0, 0, 0, 0.5), 0 18px 40px -12px rgba(0, 0, 0, 0.6);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 6px 16px -4px rgba(0, 0, 0, 0.65), 0 20px 44px -12px rgba(0, 0, 0, 0.75);
 
     color-scheme: dark;
   }
