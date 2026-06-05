@@ -1,5 +1,27 @@
 <template>
   <aside class="doc-panel">
+    <!-- 샘플 문서 (데모 체험용) -->
+    <section class="doc-section sample-section">
+      <div class="sec-head">
+        <h2>샘플 문서</h2>
+      </div>
+      <p class="sec-desc">내려받은 뒤 아래 "문서 추가"로 업로드하면 바로 질문할 수 있습니다.</p>
+      <ul class="sample-list">
+        <li v-for="s in samples" :key="s.file">
+          <a class="sample-item" :href="`/samples/${s.file}`" :download="s.file">
+            <span class="sample-dl" aria-hidden="true">↓</span>
+            <span class="sample-text">
+              <span class="sample-name">{{ s.name }}</span>
+              <small class="sample-desc">{{ s.desc }}</small>
+            </span>
+            <span class="sample-ext">{{ s.ext }}</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <div class="divider"></div>
+
     <!-- 전역 문서 -->
     <section class="doc-section">
       <div class="sec-head">
@@ -55,6 +77,15 @@ import DocList from './DocList.vue'
 const uploadingGlobal = ref(false)
 const uploadingSession = ref(false)
 const uploadError = ref('')
+
+// 데모 체험용 샘플 문서. 모두 가상의 회사/제품 데이터다.
+// 파일은 frontend/public/samples/ 에 있으며 /samples/<파일명> 으로 서빙된다.
+const samples = [
+  { file: 'lumina-x100-manual.txt', name: '루미나 X100 카메라 설명서', desc: '미러리스 카메라 사용 매뉴얼', ext: 'TXT' },
+  { file: 'orbit-mobility.md', name: '오빗모빌리티 서비스 안내', desc: '전동 스쿠터 공유 서비스', ext: 'MD' },
+  { file: 'stellar-bank-faq.md', name: '스텔라뱅크 FAQ', desc: '인터넷전문은행 자주 묻는 질문', ext: 'MD' },
+  { file: 'garden-cafe-handbook.pdf', name: '가든카페 운영 핸드북', desc: '카페 운영 가이드', ext: 'PDF' },
+]
 
 const hasSession = computed(() => store.activeSessionId != null)
 
@@ -132,6 +163,78 @@ h2 {
   height: 1px;
   background: var(--line);
   margin: 2px 0;
+}
+
+/* 샘플 문서 목록 */
+.sample-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sample-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.18s, background 0.18s, transform 0.08s;
+}
+.sample-item:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.sample-item:active {
+  transform: translateY(1px);
+}
+.sample-dl {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.sample-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.sample-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sample-desc {
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sample-ext {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  padding: 1px 5px;
 }
 
 /* Upload dropzone */
